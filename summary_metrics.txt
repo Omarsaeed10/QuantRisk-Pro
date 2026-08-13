@@ -1,0 +1,16 @@
+====================================================
+MAT231 PROJECT SUMMARY: S&P 500 DAILY RETURNS
+====================================================
+
+Sample Size (N): 1,258 trading days
+Mean (μ): 0.000543 (0.0543%)
+Variance (σ²): 0.00006369
+Standard Deviation (σ): 0.007980 (0.7980%)
+Skewness: -0.5237
+Excess Kurtosis: 2.5985
+Minimum Return: -0.041336 (-4.13%)
+Maximum Return: 0.032426 (3.24%)
+Median Return: 0.000797 (0.0797%)
+IQR: 0.008102
+Jarque-Bera Stat: 411.4433 (p-val: 4.5313e-90)
+Shapiro-Wilk Stat: 0.9649 (p-val: 7.0038e-17)

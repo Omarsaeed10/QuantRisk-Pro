@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAT231 — S&P 500 Daily Returns Distribution Analyzer</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PapaParse CDN for parsing any custom CSV file -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <!-- MathJax CDN for LaTeX Math Rendering -->
+    <script>
+        MathJax = {
+          tex: {
+            inlineMath: [['\\(', '\\)'], ['$', '$']]
+          },
+          svg: {
+            fontCache: 'global'
+          }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="dark-theme">
+    <!-- Hidden File Input for Custom CSV Upload -->
+    <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+
+    <!-- App Container -->
+    <div class="app-container">
+        <!-- Sidebar / Navigation Header -->
+        <header class="navbar">
+            <div class="brand">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-chart-area"></i>
+                </div>
+                <div>
+                    <div class="badge">MAT231 • Probability & Statistics</div>
+                    <h1 class="nav-title">Continuous Random Variables Analyzer</h1>
+                </div>
+            </div>
+
+            <div class="header-controls">
+                <div class="select-wrapper">
+                    <i class="fa-solid fa-chart-line select-icon"></i>
+                    <select id="tickerSelect" class="custom-select">
+                        <option value="MARKET_AVG" selected>📈 S&P 500 Market Average (500 Stocks)</option>
+                        <option value="AAPL">🍎 Apple Inc. (AAPL)</option>
+                        <option value="MSFT">💻 Microsoft Corp. (MSFT)</option>
+                        <option value="AMZN">📦 Amazon.com Inc. (AMZN)</option>
+                        <option value="GOOGL">🔍 Alphabet Inc. (GOOGL)</option>
+                        <option value="NVDA">⚡ NVIDIA Corp. (NVDA)</option>
+                        <option value="JPM">🏦 JPMorgan Chase (JPM)</option>
+                    </select>
+                </div>
+
+                <div class="select-wrapper">
+                    <i class="fa-solid fa-sliders select-icon text-purple"></i>
+                    <select id="toolsSelect" class="custom-select tools-select">
+                        <option value="" disabled selected>🛠️ Advanced Tools & Simulators</option>
+                        <option value="uploadCsv">📂 Upload Custom CSV File</option>
+                        <option value="monteCarlo">🎲 Monte Carlo Simulator</option>
+                        <option value="models">📊 Multi-Model Distribution Fitter</option>
+                        <option value="matrix">🏢 Multi-Asset Comparison Matrix</option>
+                        <option value="stress">☠️ Black Swan Crises Simulator</option>
+                        <option value="formula">📖 Course Formulas Reference</option>
+                        <option value="downloadCsv">📥 Export Data CSV</option>
+                    </select>
+                </div>
+
+
+                <button id="calculatorBtn" class="btn btn-outline">
+                    <i class="fa-solid fa-calculator"></i> Probability Calculator
+                </button>
+                
+                <button id="printBtn" class="btn btn-primary">
+                    <i class="fa-solid fa-file-pdf"></i> Export Report
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Content -->
+        <main class="dashboard-content">
+
+            <!-- Hero Banner / Concept Explanation -->
+            <section class="banner-card">
+                <div class="banner-info">
+                    <h2>Distribution of Stock Daily Returns as a Continuous Random Variable \(X\)</h2>
+                    <p>
+                        Daily return \(X = R_t = \frac{P_t - P_{t-1}}{P_{t-1}}\) measures the percentage change in asset price. 
+                        This interactive dashboard computes empirical statistical moments (\(\mu, \sigma^2, \gamma_1, \gamma_2\)), sampling distributions (CLT), confidence intervals, Value at Risk (VaR), Monte Carlo stochastic simulations, and compares empirical density against a theoretical Gaussian Normal Distribution \(\mathcal{N}(\mu, \sigma^2)\).
+                    </p>
+                </div>
+                <div class="banner-tags">
+                    <span class="tag"><i class="fa-solid fa-database"></i> 1,258 Days</span>
+                    <span class="tag"><i class="fa-solid fa-layer-group"></i> Continuous PDF & CDF</span>
+                    <span class="tag warning"><i class="fa-solid fa-triangle-exclamation"></i> Fat-Tailed Distribution</span>
+                </div>
+            </section>
+
+            <!-- Key Statistical Metrics Grid -->
+            <section class="metrics-grid">
+                <!-- Card 1: Mean -->
+                <div class="metric-card">
+                    <div class="card-header">
+                        <span class="metric-label">Expected Value \(E[X]\) (Mean \(\mu\))</span>
+                        <div class="icon-box blue"><i class="fa-solid fa-chart-line"></i></div>
+                    </div>
+                    <div class="metric-value" id="valMean">+0.0543%</div>
+                    <div class="metric-sub" id="valMeanAnnual">Annualized: ~14.6% / yr</div>
+                    <div class="progress-bar"><div class="progress-fill blue" style="width: 65%;"></div></div>
+                </div>
+
+                <!-- Card 2: Variance & Std Dev -->
+                <div class="metric-card">
+                    <div class="card-header">
+                        <span class="metric-label">Volatility & Variance (\(\sigma^2, \sigma\))</span>
+                        <div class="icon-box purple"><i class="fa-solid fa-wave-square"></i></div>
+                    </div>
+                    <div class="metric-value" id="valStd">0.7980%</div>
+                    <div class="metric-sub" id="valVar">Variance: 0.00006369</div>
+                    <div class="progress-bar"><div class="progress-fill purple" style="width: 45%;"></div></div>
+                </div>
+
+                <!-- Card 3: Skewness -->
+                <div class="metric-card">
+                    <div class="card-header">
+                        <span class="metric-label">Skewness (\(\gamma_1\)) — Asymmetry</span>
+                        <div class="icon-box orange"><i class="fa-solid fa-arrows-left-right-to-line"></i></div>
+                    </div>
+                    <div class="metric-value" id="valSkew">-0.5237</div>
+                    <div class="metric-sub negative-text" id="valSkewStatus">Left-Skewed (Crash Risk)</div>
+                    <div class="progress-bar"><div class="progress-fill orange" style="width: 75%;"></div></div>
+                </div>
+
+                <!-- Card 4: Excess Kurtosis -->
+                <div class="metric-card">
+                    <div class="card-header">
+                        <span class="metric-label">Excess Kurtosis (\(\gamma_2\)) — Tail Risk</span>
+                        <div class="icon-box red"><i class="fa-solid fa-chart-gantt"></i></div>
+                    </div>
+                    <div class="metric-value" id="valKurt">+2.5985</div>
+                    <div class="metric-sub warning-text" id="valKurtStatus">Leptokurtic (Fat Tails / Outliers)</div>
+                    <div class="progress-bar"><div class="progress-fill red" style="width: 85%;"></div></div>
+                </div>
+
+                <!-- Card 5: Real-World Application - Value at Risk (VaR) -->
+                <div class="metric-card full-span">
+                    <div class="card-header">
+                        <span class="metric-label"><i class="fa-solid fa-shield-halved text-gold"></i> Real-World Application: 1-Day Value at Risk (VaR Risk Metrics)</span>
+                        <div class="icon-box orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    </div>
+                    <div class="lecture-stats-grid">
+                        <div class="stat-box">
+                            <span class="box-title">95% Historical 1-Day VaR (Empirical)</span>
+                            <span class="box-val text-orange" id="valVaR95Hist">-1.28%</span>
+                            <span class="box-desc">Normal Model VaR: <span id="valVaR95Norm">-1.26%</span></span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="box-title">99% Historical 1-Day VaR (Empirical Extreme)</span>
+                            <span class="box-val text-red" id="valVaR99Hist">-2.21%</span>
+                            <span class="box-desc">Normal Model VaR: <span id="valVaR99Norm">-1.80%</span></span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="box-title">99% Tail Risk Gap (Normal Underestimation)</span>
+                            <span class="box-val text-gold" id="valVaRGap">+0.41% Extra Loss</span>
+                            <span class="box-desc">Empirical 1% worst days exceed Normal predictions.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 6: Inferential Statistics & Confidence Intervals -->
+                <div class="metric-card full-span">
+                    <div class="card-header">
+                        <span class="metric-label"><i class="fa-solid fa-graduation-cap text-blue"></i> Inferential Statistics & 95% Confidence Intervals</span>
+                        <div class="icon-box blue"><i class="fa-solid fa-calculator"></i></div>
+                    </div>
+                    <div class="lecture-stats-grid">
+                        <div class="stat-box">
+                            <span class="box-title">Standard Error of Mean \(SE(\bar{X})\)</span>
+                            <span class="box-val text-blue" id="valSE">0.0225%</span>
+                            <span class="box-desc">Formula: \(SE = \frac{s}{\sqrt{n}}\)</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="box-title">95% Confidence Interval for \(\mu\)</span>
+                            <span class="box-val text-green" id="valCIMean">[+0.0102%, +0.0984%]</span>
+                            <span class="box-desc">Formula: \(\bar{x} \pm 1.96 \frac{s}{\sqrt{n}}\)</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="box-title">95% Chi-Square CI for Variance \(\sigma^2\)</span>
+                            <span class="box-val text-purple" id="valCIVar">[0.0000592, 0.0000687]</span>
+                            <span class="box-desc">Formula: \(\frac{(n-1)s^2}{\chi^2_{\alpha/2}} < \sigma^2 < \frac{(n-1)s^2}{\chi^2_{1-\alpha/2}}\)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 7: Normality Test Status -->
+                <div class="metric-card full-span">
+                    <div class="card-header">
+                        <span class="metric-label">Hypothesis Testing: Normality Check (\(H_0: X \sim \mathcal{N}\))</span>
+                        <div class="icon-box green"><i class="fa-solid fa-vial-circle-check"></i></div>
+                    </div>
+                    <div class="normality-flex">
+                        <div class="test-badge rejected">
+                            <i class="fa-solid fa-circle-xmark"></i> \(H_0\) REJECTED (\(p < 0.0001\))
+                        </div>
+                        <div class="test-details">
+                            <span><b>Jarque-Bera Stat:</b> <span id="valJB">411.44</span></span>
+                            <span><b>Shapiro-Wilk Stat:</b> <span>0.9649</span></span>
+                            <span class="note">Conclusion: Stock daily returns systematically violate Gaussian Normality.</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chart Section Tabs -->
+            <section class="chart-section">
+                <div class="section-header">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="histogram">
+                            <i class="fa-solid fa-chart-column"></i> Histogram & Density Fits
+                        </button>
+                        <button class="tab-btn" data-tab="qqplot">
+                            <i class="fa-solid fa-braille"></i> Q-Q Plot Diagnostic
+                        </button>
+                        <button class="tab-btn" data-tab="timeseries">
+                            <i class="fa-solid fa-chart-line"></i> Daily Returns Time Series
+                        </button>
+                        <button class="tab-btn" data-tab="cdf">
+                            <i class="fa-solid fa-bezier-curve"></i> Empirical vs Normal CDF
+                        </button>
+                    </div>
+
+                    <div class="chart-actions">
+                        <span class="indicator-dot active"></span> Live Rendered
+                    </div>
+                </div>
+
+                <div class="chart-container-box">
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Summary & Interpretation Cards -->
+            <section class="analysis-grid">
+                <div class="analysis-card">
+                    <div class="card-title">
+                        <i class="fa-solid fa-calculator text-blue"></i> Statistical Summary Table
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Symbol</th>
+                                    <th>Value</th>
+                                    <th>Normal Target</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Sample Observations</td>
+                                    <td>\(N\)</td>
+                                    <td id="tblN">1,258</td>
+                                    <td>—</td>
+                                </tr>
+                                <tr>
+                                    <td>Mean Return</td>
+                                    <td>\(\mu\)</td>
+                                    <td id="tblMean">0.0543%</td>
+                                    <td>0.00%</td>
+                                </tr>
+                                <tr>
+                                    <td>Variance</td>
+                                    <td>\(\sigma^2\)</td>
+                                    <td id="tblVar">0.00006369</td>
+                                    <td>—</td>
+                                </tr>
+                                <tr>
+                                    <td>Standard Deviation</td>
+                                    <td>\(\sigma\)</td>
+                                    <td id="tblStd">0.7980%</td>
+                                    <td>—</td>
+                                </tr>
+                                <tr>
+                                    <td>Skewness</td>
+                                    <td>\(\gamma_1\)</td>
+                                    <td id="tblSkew">-0.5237</td>
+                                    <td>0.0000</td>
+                                </tr>
+                                <tr>
+                                    <td>Excess Kurtosis</td>
+                                    <td>\(\gamma_2\)</td>
+                                    <td id="tblKurt">+2.5985</td>
+                                    <td>0.0000</td>
+                                </tr>
+                                <tr>
+                                    <td>Min / Max Return</td>
+                                    <td>\(X_{\min} / X_{\max}\)</td>
+                                    <td id="tblMinMax">-4.13% / +3.24%</td>
+                                    <td>Symmetric</td>
+                                </tr>
+                                <tr>
+                                    <td>Median Return</td>
+                                    <td>\(\tilde{X}\)</td>
+                                    <td id="tblMedian">+0.0797%</td>
+                                    <td>\(\approx \mu\)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <div class="card-title">
+                        <i class="fa-solid fa-sliders text-purple"></i> Empirical vs Normal Quantiles Breakdown
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Percentile</th>
+                                    <th>Empirical Return</th>
+                                    <th>Normal Prediction</th>
+                                    <th>Deviation</th>
+                                </tr>
+                            </thead>
+                            <tbody id="quantileTableBody">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Monte Carlo Simulator Modal -->
+        <div id="monteCarloModal" class="modal-backdrop hidden">
+            <div class="modal-card wide-modal">
+                <div class="modal-header">
+                    <h3><i class="fa-solid fa-dice text-blue"></i> Monte Carlo Stochastic Price Simulation (Geometric Brownian Motion)</h3>
+                    <button id="closeMonteCarloModal" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-desc">
+                        Simulating 10 random price trajectories 60 days into the future based on empirical continuous parameters (\(dS_t = \mu S_t dt + \sigma S_t dW_t\)).
+                    </p>
+                    <div class="chart-container-box" style="height: 340px;">
+                        <canvas id="mcChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Multi-Model Distribution Fitter Modal -->
+        <div id="modelsModal" class="modal-backdrop hidden">
+            <div class="modal-card wide-modal">
+                <div class="modal-header">
+                    <h3><i class="fa-solid fa-chart-pie text-green"></i> Multi-Model Distribution Goodness-of-Fit Ranking</h3>
+                    <button id="closeModelsModal" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Probability Distribution Model</th>
+                                    <th>Log-Likelihood Score</th>
+                                    <th>Quality Rank</th>
+                                    <th>Fit Assessment</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modelsTableBody">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Multi-Asset Comparison Matrix Modal -->
+        <div id="matrixModal" class="modal-backdrop hidden">
+            <div class="modal-card wide-modal">
+                <div class="modal-header">
+                    <h3><i class="fa-solid fa-table-cells text-blue"></i> Multi-Asset Statistical Comparison Matrix</h3>
+                    <button id="closeMatrixModal" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Asset Ticker</th>
+                                    <th>Mean (\(\mu\))</th>
+                                    <th>Std Dev (\(\sigma\))</th>
+                                    <th>Skewness (\(\gamma_1\))</th>
+                                    <th>Kurtosis (\(\gamma_2\))</th>
+                                    <th>Jarque-Bera Stat</th>
+                                    <th>Normality</th>
+                                </tr>
+                            </thead>
+                            <tbody id="matrixTableBody">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Black Swan Stress Test Modal -->
+        <div id="stressModal" class="modal-backdrop hidden">
+            <div class="modal-card wide-modal">
+                <div class="modal-header">
+                    <h3><i class="fa-solid fa-skull-crossbones text-red"></i> Historical Black Swan Crises Stress Simulator</h3>
+                    <button id="closeStressModal" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-desc">
+                        Comparing real-world extreme market crash events against Gaussian Normal Distribution theoretical predictions (\(Z = \frac{X - \mu}{\sigma}\)).
+                    </p>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Historical Crash Event</th>
+                                    <th>1-Day Drop</th>
+                                    <th>Theoretical Z-Score</th>
+                                    <th>Gaussian Predicted Odds</th>
+                                    <th>Empirical Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stressTableBody">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course Formulas Reference Modal -->
+        <div id="formulaModal" class="modal-backdrop hidden">
+            <div class="modal-card wide-modal">
+                <div class="modal-header">
+                    <h3><i class="fa-solid fa-book text-blue"></i> MAT231 Course Formula Reference</h3>
+                    <button id="closeFormulaModal" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body formula-body">
+                    <div class="formula-group">
+                        <h4>1. Continuous Random Variables (PDF & CDF)</h4>
+                        <ul>
+                            <li><b>Probability Density Function (PDF):</b> \(f(x) \ge 0\), \(\int_{-\infty}^{\infty} f(x) dx = 1\)</li>
+                            <li><b>Probability Calculation:</b> \(P(a \le X \le b) = \int_{a}^{b} f(x) dx\)</li>
+                            <li><b>Cumulative Distribution Function (CDF):</b> \(F(x) = P(X \le x) = \int_{-\infty}^{x} f(t) dt\)</li>
+                            <li><b>Expected Value (Mean):</b> \(\mu = E[X] = \int_{-\infty}^{\infty} x f(x) dx\)</li>
+                            <li><b>Variance:</b> \(\sigma^2 = \text{Var}(X) = E[X^2] - \mu^2\)</li>
+                        </ul>
+                    </div>
+
+                    <div class="formula-group">
+                        <h4>2. Normal & Standard Normal Distribution</h4>
+                        <ul>
+                            <li><b>Normal PDF:</b> \(n(x; \mu, \sigma) = \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{1}{2\sigma^2}(x-\mu)^2}\)</li>
+                            <li><b>Standard Normal Transformation:</b> \(Z = \frac{X - \mu}{\sigma} \sim \mathcal{N}(0, 1)\)</li>
+                            <li><b>Standard Z Values:</b> \(P(-1.96 < Z < 1.96) = 0.95\) (95% CI)</li>
+                        </ul>
+                    </div>
+
+                    <div class="formula-group">
+                        <h4>3. Central Limit Theorem & Confidence Intervals</h4>
+                        <ul>
+                            <li><b>Sampling Distribution of \(\bar{X}\):</b> \(\mu_{\bar{X}} = \mu\), \(\sigma^2_{\bar{X}} = \frac{\sigma^2}{n}\)</li>
+                            <li><b>Standard Error:</b> \(SE = \frac{s}{\sqrt{n}}\)</li>
+                            <li><b>95% Confidence Interval for Mean \(\mu\):</b> \(\bar{x} \pm z_{\alpha/2} \frac{\sigma}{\sqrt{n}}\) (\(z_{0.025} = 1.96\))</li>
+                            <li><b>95% Chi-Square CI for Variance \(\sigma^2\):</b> \(\frac{(n-1)s^2}{\chi^2_{\alpha/2}} < \sigma^2 < \frac{(n-1)s^2}{\chi^2_{1-\alpha/2}}\)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Probability Calculator Modal -->
+        <div id="calcModal" class="modal-backdrop hidden">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3><i class="fa-solid fa-calculator"></i> Daily Return Probability Calculator</h3>
+                    <button id="closeModal" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-desc">
+                        Calculate the probability \(P(X \le x)\) of observing a daily market return less than or equal to a threshold \(x\%\).
+                    </p>
+                    
+                    <div class="form-group">
+                        <label for="returnInput">Daily Return Threshold \(x\) (%):</label>
+                        <div class="input-with-suffix">
+                            <input type="number" id="returnInput" value="-2.8" step="0.1">
+                            <span class="suffix">%</span>
+                        </div>
+                    </div>
+
+                    <div class="calc-results">
+                        <div class="calc-row">
+                            <span>Empirical Sample Probability \(P(X \le x)\):</span>
+                            <strong id="empProbResult" class="text-blue">1.03%</strong>
+                        </div>
+                        <div class="calc-row">
+                            <span>Theoretical Normal Probability \(P(Z \le z)\):</span>
+                            <strong id="normProbResult" class="text-red">0.02%</strong>
+                        </div>
+                        <div class="calc-row highlight">
+                            <span>Underestimation Ratio (Empirical / Normal):</span>
+                            <strong id="underestRatio" class="text-gold">59.2x Higher Risk</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="modalCalcBtn" class="btn btn-primary">Calculate Probability</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>MAT231 Probability & Statistics • S&P 500 Daily Returns Continuous Random Variables Project</p>
+            <p class="sub-footer">Built with Vanilla HTML5, CSS3, JavaScript & Chart.js</p>
+        </footer>
+    </div>
+
+    <!-- Application Scripts -->
+    <script src="app_data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
