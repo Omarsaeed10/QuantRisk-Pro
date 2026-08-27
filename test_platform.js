@@ -35,8 +35,7 @@ async function runTests() {
         "styles.css",
         "app.js",
         "app_data.js",
-        "generate_pdf_report.py",
-        "generate_pptx_presentation.py"
+        "analysis.py"
     ];
     files.forEach(f => {
         const fullPath = path.join(projectDir, f);

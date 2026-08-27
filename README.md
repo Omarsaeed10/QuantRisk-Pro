@@ -55,10 +55,6 @@ Rooted in the rigorous mathematical foundations of **Continuous Random Variables
 ├── app_data.js                  # Pre-computed JSON Database (41 Assets & Portfolios)
 ├── app_data.json                # Raw Institutional JSON Data Store
 ├── analysis.py                  # Python Quantitative Data & Diagnostic Plots Pipeline
-├── export_app_data.py           # Institutional Asset Pipeline (Basel III, CIs, Fits)
-├── export_advanced_metrics.py   # Stress Testing, Markowitz Frontier & Model Ranking Exporter
-├── generate_pdf_report.py       # Board-Ready 12-Page Institutional PDF Report Generator
-├── generate_pptx_presentation.py# Commercial Investor & Pitch Deck Presentation Generator
 ├── Run_App.bat                  # 1-Click Desktop Launcher
 ├── report.md                    # Comprehensive Academic Research Paper & Technical Spec
 ├── summary_metrics.txt          # Exported Text Summary of Empirical Metrics
