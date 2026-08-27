@@ -1,542 +1,950 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAT231 — S&P 500 Daily Returns Distribution Analyzer</title>
-    <!-- Google Fonts -->
+    <title>QuantRisk Pro™ — Institutional Risk & Portfolio Intelligence</title>
+    <!-- Google Fonts: Inter & Cairo & Fira Code -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js CDN -->
+    <!-- Chart.js CDN with fallback -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- PapaParse CDN for parsing any custom CSV file -->
+    <script>
+        if (typeof Chart === 'undefined') {
+            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>');
+        }
+    </script>
+    <!-- PapaParse CDN for CSV Parsing -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <!-- MathJax CDN for LaTeX Math Rendering -->
     <script>
-        MathJax = {
+        window.MathJax = {
           tex: {
             inlineMath: [['\\(', '\\)'], ['$', '$']]
           },
-          svg: {
-            fontCache: 'global'
-          }
+          svg: { fontCache: 'global' }
         };
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="dark-theme">
+<body class="dark-theme theme-indigo">
     <!-- Hidden File Input for Custom CSV Upload -->
     <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
 
-    <!-- App Container -->
-    <div class="app-container">
-        <!-- Sidebar / Navigation Header -->
-        <header class="navbar">
-            <div class="brand">
-                <div class="logo-icon">
-                    <i class="fa-solid fa-chart-area"></i>
+    <div class="pro-layout-wrapper">
+        
+        <!-- Left Sidebar Navigation (TradingView / Pro SaaS Style) -->
+        <aside class="pro-sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fa-solid fa-shield-halved"></i>
                 </div>
+                <div class="sidebar-brand-title">QuantRisk Pro™</div>
+            </div>
+
+            <div class="sidebar-nav-container">
+                <!-- Group 1: Workspace -->
                 <div>
-                    <div class="badge">MAT231 • Probability & Statistics</div>
-                    <h1 class="nav-title">Continuous Random Variables Analyzer</h1>
+                    <div class="nav-group-title" data-i18n="nav_grp_workspace">WORKSPACE</div>
+                    <ul class="sidebar-nav-list">
+                        <li>
+                            <a href="#" class="sidebar-nav-item active" id="navItemDashboard">
+                                <i class="fa-solid fa-chart-line"></i> <span data-i18n="nav_dashboard">Overview &amp; Studio</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-nav-item" id="navItemAI">
+                                <i class="fa-solid fa-brain text-blue"></i> <span data-i18n="nav_ai">Quant AI Copilot</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-nav-item" id="navItemOptimizer">
+                                <i class="fa-solid fa-briefcase"></i> <span data-i18n="nav_optimizer">Markowitz Optimizer</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-nav-item" id="navItemHeatmap">
+                                <i class="fa-solid fa-table-cells"></i> <span data-i18n="nav_heatmap">Correlation Heatmap</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-nav-item" id="navItemStress">
+                                <i class="fa-solid fa-triangle-exclamation text-red"></i> <span data-i18n="nav_stress">Black Swan Stress Lab</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-nav-item" id="navItemMonteCarlo">
+                                <i class="fa-solid fa-dice"></i> <span data-i18n="nav_mc">Monte Carlo Simulator</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-nav-item" id="navItemModels">
+                                <i class="fa-solid fa-chart-pie"></i> <span data-i18n="nav_fitter">Distribution Fitter</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-nav-item" id="navItemMatrix">
+                                <i class="fa-solid fa-layer-group"></i> <span data-i18n="nav_matrix">Risk Matrix (41 Assets)</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Group 2: Audit & Tools -->
+                <div>
+                    <div class="nav-group-title" data-i18n="nav_grp_audit">AUDIT &amp; TOOLS</div>
+                    <ul class="sidebar-nav-list">
+                        <li>
+                            <a href="#" class="sidebar-nav-item" id="navItemCertificate">
+                                <i class="fa-solid fa-certificate text-gold"></i> <span data-i18n="nav_certificate">Risk Certificate</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-nav-item" id="navItemCalculator">
+                                <i class="fa-solid fa-calculator"></i> <span data-i18n="nav_calculator">VaR Calculator</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-nav-item" id="navItemPricing">
+                                <i class="fa-solid fa-cube"></i> <span data-i18n="nav_pricing">Commercial Tiers &amp; API</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-nav-item" id="navItemFormula">
+                                <i class="fa-solid fa-book"></i> <span data-i18n="nav_formulas">Formulas &amp; Theory</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-nav-item" id="navItemUpload">
+                                <i class="fa-solid fa-file-arrow-up"></i> <span data-i18n="nav_upload">Upload Custom CSV</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-nav-item" id="navItemExportPdf">
+                                <i class="fa-solid fa-file-pdf text-red"></i> <span data-i18n="nav_pdf">Export Audit PDF</span>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
-            <div class="header-controls">
-                <div class="select-wrapper">
-                    <i class="fa-solid fa-chart-line select-icon"></i>
-                    <select id="tickerSelect" class="custom-select">
-                        <option value="MARKET_AVG" selected>📈 S&P 500 Market Average (500 Stocks)</option>
-                        <option value="AAPL">🍎 Apple Inc. (AAPL)</option>
-                        <option value="MSFT">💻 Microsoft Corp. (MSFT)</option>
-                        <option value="AMZN">📦 Amazon.com Inc. (AMZN)</option>
-                        <option value="GOOGL">🔍 Alphabet Inc. (GOOGL)</option>
-                        <option value="NVDA">⚡ NVIDIA Corp. (NVDA)</option>
-                        <option value="JPM">🏦 JPMorgan Chase (JPM)</option>
-                    </select>
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <div class="sidebar-author">
+                    Lead Architect: <strong>Omar Saeed</strong>
+                </div>
+                <div style="font-size: 10px; color: var(--text-muted);">
+                    Basel III/IV Compliance Engine
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Pro Content Area -->
+        <div class="pro-main-area">
+            
+            <!-- Pro Header Bar -->
+            <header class="pro-header">
+                <div class="header-left-controls">
+                    <!-- Universal Search -->
+                    <div class="search-box-wrapper">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="universalSearchInput" placeholder="Search 505 assets (e.g. NVDA, AAPL)..." class="universal-search-input" autocomplete="off">
+                        <div id="searchResultsDropdown" class="search-results-dropdown hidden"></div>
+                    </div>
+
+                    <!-- Asset Selector -->
+                    <div class="select-wrapper">
+                        <i class="fa-solid fa-chart-pie select-icon"></i>
+                        <select id="tickerSelect" class="custom-select" title="Select Asset or Portfolio">
+                            <optgroup label="Market Benchmark">
+                                <option value="MARKET_AVG" selected>S&amp;P 500 Benchmark (Equal-Weighted Index)</option>
+                            </optgroup>
+                            <optgroup label="Pre-Engineered Portfolios">
+                                <option value="PORT_TECH">Mega-Cap Tech Alpha Portfolio</option>
+                                <option value="PORT_FINANCE">US Tier-1 Banking &amp; Financials</option>
+                                <option value="PORT_HEALTH">Healthcare &amp; Biotech Defensive</option>
+                                <option value="PORT_DEFENSIVE">All-Weather Inflation &amp; Defensive</option>
+                                <option value="PORT_BALANCED">Global Multi-Asset Endowment</option>
+                            </optgroup>
+                            <optgroup label="Technology &amp; AI">
+                                <option value="AAPL">Apple Inc. (AAPL)</option>
+                                <option value="MSFT">Microsoft Corp. (MSFT)</option>
+                                <option value="NVDA">NVIDIA Corp. (NVDA)</option>
+                                <option value="GOOGL">Alphabet Inc. (GOOGL)</option>
+                                <option value="AMZN">Amazon.com Inc. (AMZN)</option>
+                                <option value="META">Meta Platforms Inc. (META)</option>
+                                <option value="ADBE">Adobe Inc. (ADBE)</option>
+                                <option value="INTC">Intel Corp. (INTC)</option>
+                            </optgroup>
+                            <optgroup label="Financials &amp; Banking">
+                                <option value="JPM">JPMorgan Chase &amp; Co. (JPM)</option>
+                                <option value="BAC">Bank of America (BAC)</option>
+                                <option value="GS">Goldman Sachs (GS)</option>
+                                <option value="MS">Morgan Stanley (MS)</option>
+                            </optgroup>
+                            <optgroup label="Healthcare &amp; Energy">
+                                <option value="JNJ">Johnson &amp; Johnson (JNJ)</option>
+                                <option value="UNH">UnitedHealth Group (UNH)</option>
+                                <option value="XOM">Exxon Mobil Corp. (XOM)</option>
+                                <option value="CVX">Chevron Corp. (CVX)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <!-- Currency Selector -->
+                    <div class="select-wrapper">
+                        <select id="currencySelect" class="custom-select currency-select" title="Currency">
+                            <option value="USD" selected>USD ($)</option>
+                            <option value="SAR">SAR (ر.س)</option>
+                            <option value="AED">AED (د.إ)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="EGP">EGP (ج.م)</option>
+                            <option value="GBP">GBP (£)</option>
+                        </select>
+                    </div>
+
+                    <!-- Capital Input -->
+                    <div class="capital-input-wrapper" title="Valuation Capital">
+                        <span class="capital-label" data-i18n="capital_label">Capital:</span>
+                        <input type="number" id="portfolioCapital" value="1000000" min="1000" step="50000" class="capital-input">
+                    </div>
                 </div>
 
-                <div class="select-wrapper">
-                    <i class="fa-solid fa-sliders select-icon text-purple"></i>
-                    <select id="toolsSelect" class="custom-select tools-select">
-                        <option value="" disabled selected>🛠️ Advanced Tools & Simulators</option>
-                        <option value="uploadCsv">📂 Upload Custom CSV File</option>
-                        <option value="monteCarlo">🎲 Monte Carlo Simulator</option>
-                        <option value="models">📊 Multi-Model Distribution Fitter</option>
-                        <option value="matrix">🏢 Multi-Asset Comparison Matrix</option>
-                        <option value="stress">☠️ Black Swan Crises Simulator</option>
-                        <option value="formula">📖 Course Formulas Reference</option>
-                        <option value="downloadCsv">📥 Export Data CSV</option>
-                    </select>
+                <div class="header-right-controls">
+                    <!-- Theme Selector -->
+                    <div class="select-wrapper">
+                        <select id="themeSelect" class="custom-select theme-select" title="Color Theme">
+                            <option value="indigo" selected>🔮 Indigo</option>
+                            <option value="emerald">🟢 Emerald</option>
+                            <option value="bloomberg">🟡 Bloomberg</option>
+                            <option value="crimson">🔴 Ruby Red</option>
+                            <option value="ocean">🌊 Oceanic</option>
+                            <option value="light">☀️ Light</option>
+                        </select>
+                    </div>
+
+                    <!-- Language Switcher -->
+                    <button id="langToggleBtn" class="btn btn-outline" title="Toggle Language (EN / العربية)">
+                        <i class="fa-solid fa-globe"></i> <span id="langText">العربية</span>
+                    </button>
+
+                    <!-- Quick Print Button -->
+                    <button id="printBtn" class="btn btn-primary" title="Export PDF">
+                        <i class="fa-solid fa-file-pdf"></i> <span data-i18n="btn_export_pdf">Audit Report</span>
+                    </button>
                 </div>
+            </header>
 
-
-                <button id="calculatorBtn" class="btn btn-outline">
-                    <i class="fa-solid fa-calculator"></i> Probability Calculator
-                </button>
+            <!-- Main Pro Workspace -->
+            <main class="pro-workspace">
                 
-                <button id="printBtn" class="btn btn-primary">
-                    <i class="fa-solid fa-file-pdf"></i> Export Report
-                </button>
-            </div>
-        </header>
-
-        <!-- Main Dashboard Content -->
-        <main class="dashboard-content">
-
-            <!-- Hero Banner / Concept Explanation -->
-            <section class="banner-card">
-                <div class="banner-info">
-                    <h2>Distribution of Stock Daily Returns as a Continuous Random Variable \(X\)</h2>
-                    <p>
-                        Daily return \(X = R_t = \frac{P_t - P_{t-1}}{P_{t-1}}\) measures the percentage change in asset price. 
-                        This interactive dashboard computes empirical statistical moments (\(\mu, \sigma^2, \gamma_1, \gamma_2\)), sampling distributions (CLT), confidence intervals, Value at Risk (VaR), Monte Carlo stochastic simulations, and compares empirical density against a theoretical Gaussian Normal Distribution \(\mathcal{N}(\mu, \sigma^2)\).
-                    </p>
-                </div>
-                <div class="banner-tags">
-                    <span class="tag"><i class="fa-solid fa-database"></i> 1,258 Days</span>
-                    <span class="tag"><i class="fa-solid fa-layer-group"></i> Continuous PDF & CDF</span>
-                    <span class="tag warning"><i class="fa-solid fa-triangle-exclamation"></i> Fat-Tailed Distribution</span>
-                </div>
-            </section>
-
-            <!-- Key Statistical Metrics Grid -->
-            <section class="metrics-grid">
-                <!-- Card 1: Mean -->
-                <div class="metric-card">
-                    <div class="card-header">
-                        <span class="metric-label">Expected Value \(E[X]\) (Mean \(\mu\))</span>
-                        <div class="icon-box blue"><i class="fa-solid fa-chart-line"></i></div>
-                    </div>
-                    <div class="metric-value" id="valMean">+0.0543%</div>
-                    <div class="metric-sub" id="valMeanAnnual">Annualized: ~14.6% / yr</div>
-                    <div class="progress-bar"><div class="progress-fill blue" style="width: 65%;"></div></div>
-                </div>
-
-                <!-- Card 2: Variance & Std Dev -->
-                <div class="metric-card">
-                    <div class="card-header">
-                        <span class="metric-label">Volatility & Variance (\(\sigma^2, \sigma\))</span>
-                        <div class="icon-box purple"><i class="fa-solid fa-wave-square"></i></div>
-                    </div>
-                    <div class="metric-value" id="valStd">0.7980%</div>
-                    <div class="metric-sub" id="valVar">Variance: 0.00006369</div>
-                    <div class="progress-bar"><div class="progress-fill purple" style="width: 45%;"></div></div>
-                </div>
-
-                <!-- Card 3: Skewness -->
-                <div class="metric-card">
-                    <div class="card-header">
-                        <span class="metric-label">Skewness (\(\gamma_1\)) — Asymmetry</span>
-                        <div class="icon-box orange"><i class="fa-solid fa-arrows-left-right-to-line"></i></div>
-                    </div>
-                    <div class="metric-value" id="valSkew">-0.5237</div>
-                    <div class="metric-sub negative-text" id="valSkewStatus">Left-Skewed (Crash Risk)</div>
-                    <div class="progress-bar"><div class="progress-fill orange" style="width: 75%;"></div></div>
-                </div>
-
-                <!-- Card 4: Excess Kurtosis -->
-                <div class="metric-card">
-                    <div class="card-header">
-                        <span class="metric-label">Excess Kurtosis (\(\gamma_2\)) — Tail Risk</span>
-                        <div class="icon-box red"><i class="fa-solid fa-chart-gantt"></i></div>
-                    </div>
-                    <div class="metric-value" id="valKurt">+2.5985</div>
-                    <div class="metric-sub warning-text" id="valKurtStatus">Leptokurtic (Fat Tails / Outliers)</div>
-                    <div class="progress-bar"><div class="progress-fill red" style="width: 85%;"></div></div>
-                </div>
-
-                <!-- Card 5: Real-World Application - Value at Risk (VaR) -->
-                <div class="metric-card full-span">
-                    <div class="card-header">
-                        <span class="metric-label"><i class="fa-solid fa-shield-halved text-gold"></i> Real-World Application: 1-Day Value at Risk (VaR Risk Metrics)</span>
-                        <div class="icon-box orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                    </div>
-                    <div class="lecture-stats-grid">
-                        <div class="stat-box">
-                            <span class="box-title">95% Historical 1-Day VaR (Empirical)</span>
-                            <span class="box-val text-orange" id="valVaR95Hist">-1.28%</span>
-                            <span class="box-desc">Normal Model VaR: <span id="valVaR95Norm">-1.26%</span></span>
+                <!-- Row 1: 4 Key Empirical Moments KPI Cards -->
+                <section class="kpi-moments-grid">
+                    <!-- Card 1: Expected Value Mean -->
+                    <div class="kpi-moment-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label" data-i18n="lbl_expected_return">Mean Expected Drift (\(\mu\))</span>
+                            <div class="kpi-icon"><i class="fa-solid fa-chart-line"></i></div>
                         </div>
-                        <div class="stat-box">
-                            <span class="box-title">99% Historical 1-Day VaR (Empirical Extreme)</span>
-                            <span class="box-val text-red" id="valVaR99Hist">-2.21%</span>
-                            <span class="box-desc">Normal Model VaR: <span id="valVaR99Norm">-1.80%</span></span>
+                        <div class="kpi-value" id="valMean">+0.0543%</div>
+                        <div class="kpi-sub" id="valMeanAnnual">Annualized: ~14.6% / yr</div>
+                        <div class="kpi-progress"><div class="kpi-fill" style="width: 65%;"></div></div>
+                    </div>
+
+                    <!-- Card 2: Volatility & Variance -->
+                    <div class="kpi-moment-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label" data-i18n="lbl_volatility">Volatility (\(\sigma\)) &amp; Variance</span>
+                            <div class="kpi-icon"><i class="fa-solid fa-wave-square"></i></div>
                         </div>
-                        <div class="stat-box">
-                            <span class="box-title">99% Tail Risk Gap (Normal Underestimation)</span>
-                            <span class="box-val text-gold" id="valVaRGap">+0.41% Extra Loss</span>
-                            <span class="box-desc">Empirical 1% worst days exceed Normal predictions.</span>
+                        <div class="kpi-value" id="valStd">0.7980%</div>
+                        <div class="kpi-sub" id="valVar">Variance: 0.00006369</div>
+                        <div class="kpi-progress"><div class="kpi-fill" style="width: 48%;"></div></div>
+                    </div>
+
+                    <!-- Card 3: Skewness -->
+                    <div class="kpi-moment-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label" data-i18n="lbl_skewness">Skewness (\(\gamma_1\)) — Asymmetry</span>
+                            <div class="kpi-icon"><i class="fa-solid fa-arrows-left-right"></i></div>
                         </div>
+                        <div class="kpi-value" id="valSkew">-0.5237</div>
+                        <div class="kpi-sub" id="valSkewStatus">Left-Skewed Crash Risk</div>
+                        <div class="kpi-progress"><div class="kpi-fill" style="width: 75%;"></div></div>
                     </div>
-                </div>
 
-                <!-- Card 6: Inferential Statistics & Confidence Intervals -->
-                <div class="metric-card full-span">
-                    <div class="card-header">
-                        <span class="metric-label"><i class="fa-solid fa-graduation-cap text-blue"></i> Inferential Statistics & 95% Confidence Intervals</span>
-                        <div class="icon-box blue"><i class="fa-solid fa-calculator"></i></div>
-                    </div>
-                    <div class="lecture-stats-grid">
-                        <div class="stat-box">
-                            <span class="box-title">Standard Error of Mean \(SE(\bar{X})\)</span>
-                            <span class="box-val text-blue" id="valSE">0.0225%</span>
-                            <span class="box-desc">Formula: \(SE = \frac{s}{\sqrt{n}}\)</span>
+                    <!-- Card 4: Kurtosis -->
+                    <div class="kpi-moment-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label" data-i18n="lbl_kurtosis">Excess Kurtosis (\(\gamma_2\)) — Tails</span>
+                            <div class="kpi-icon"><i class="fa-solid fa-chart-column"></i></div>
                         </div>
-                        <div class="stat-box">
-                            <span class="box-title">95% Confidence Interval for \(\mu\)</span>
-                            <span class="box-val text-green" id="valCIMean">[+0.0102%, +0.0984%]</span>
-                            <span class="box-desc">Formula: \(\bar{x} \pm 1.96 \frac{s}{\sqrt{n}}\)</span>
-                        </div>
-                        <div class="stat-box">
-                            <span class="box-title">95% Chi-Square CI for Variance \(\sigma^2\)</span>
-                            <span class="box-val text-purple" id="valCIVar">[0.0000592, 0.0000687]</span>
-                            <span class="box-desc">Formula: \(\frac{(n-1)s^2}{\chi^2_{\alpha/2}} < \sigma^2 < \frac{(n-1)s^2}{\chi^2_{1-\alpha/2}}\)</span>
-                        </div>
+                        <div class="kpi-value" id="valKurt">+2.5985</div>
+                        <div class="kpi-sub" id="valKurtStatus">Leptokurtic (Heavy Tails)</div>
+                        <div class="kpi-progress"><div class="kpi-fill" style="width: 85%;"></div></div>
                     </div>
-                </div>
+                </section>
 
-                <!-- Card 7: Normality Test Status -->
-                <div class="metric-card full-span">
-                    <div class="card-header">
-                        <span class="metric-label">Hypothesis Testing: Normality Check (\(H_0: X \sim \mathcal{N}\))</span>
-                        <div class="icon-box green"><i class="fa-solid fa-vial-circle-check"></i></div>
-                    </div>
-                    <div class="normality-flex">
-                        <div class="test-badge rejected">
-                            <i class="fa-solid fa-circle-xmark"></i> \(H_0\) REJECTED (\(p < 0.0001\))
-                        </div>
-                        <div class="test-details">
-                            <span><b>Jarque-Bera Stat:</b> <span id="valJB">411.44</span></span>
-                            <span><b>Shapiro-Wilk Stat:</b> <span>0.9649</span></span>
-                            <span class="note">Conclusion: Stock daily returns systematically violate Gaussian Normality.</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Chart Section Tabs -->
-            <section class="chart-section">
-                <div class="section-header">
-                    <div class="tab-buttons">
-                        <button class="tab-btn active" data-tab="histogram">
-                            <i class="fa-solid fa-chart-column"></i> Histogram & Density Fits
-                        </button>
-                        <button class="tab-btn" data-tab="qqplot">
-                            <i class="fa-solid fa-braille"></i> Q-Q Plot Diagnostic
-                        </button>
-                        <button class="tab-btn" data-tab="timeseries">
-                            <i class="fa-solid fa-chart-line"></i> Daily Returns Time Series
-                        </button>
-                        <button class="tab-btn" data-tab="cdf">
-                            <i class="fa-solid fa-bezier-curve"></i> Empirical vs Normal CDF
-                        </button>
-                    </div>
-
-                    <div class="chart-actions">
-                        <span class="indicator-dot active"></span> Live Rendered
-                    </div>
-                </div>
-
-                <div class="chart-container-box">
-                    <canvas id="mainChart"></canvas>
-                </div>
-            </section>
-
-            <!-- Summary & Interpretation Cards -->
-            <section class="analysis-grid">
-                <div class="analysis-card">
-                    <div class="card-title">
-                        <i class="fa-solid fa-calculator text-blue"></i> Statistical Summary Table
-                    </div>
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Parameter</th>
-                                    <th>Symbol</th>
-                                    <th>Value</th>
-                                    <th>Normal Target</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Sample Observations</td>
-                                    <td>\(N\)</td>
-                                    <td id="tblN">1,258</td>
-                                    <td>—</td>
-                                </tr>
-                                <tr>
-                                    <td>Mean Return</td>
-                                    <td>\(\mu\)</td>
-                                    <td id="tblMean">0.0543%</td>
-                                    <td>0.00%</td>
-                                </tr>
-                                <tr>
-                                    <td>Variance</td>
-                                    <td>\(\sigma^2\)</td>
-                                    <td id="tblVar">0.00006369</td>
-                                    <td>—</td>
-                                </tr>
-                                <tr>
-                                    <td>Standard Deviation</td>
-                                    <td>\(\sigma\)</td>
-                                    <td id="tblStd">0.7980%</td>
-                                    <td>—</td>
-                                </tr>
-                                <tr>
-                                    <td>Skewness</td>
-                                    <td>\(\gamma_1\)</td>
-                                    <td id="tblSkew">-0.5237</td>
-                                    <td>0.0000</td>
-                                </tr>
-                                <tr>
-                                    <td>Excess Kurtosis</td>
-                                    <td>\(\gamma_2\)</td>
-                                    <td id="tblKurt">+2.5985</td>
-                                    <td>0.0000</td>
-                                </tr>
-                                <tr>
-                                    <td>Min / Max Return</td>
-                                    <td>\(X_{\min} / X_{\max}\)</td>
-                                    <td id="tblMinMax">-4.13% / +3.24%</td>
-                                    <td>Symmetric</td>
-                                </tr>
-                                <tr>
-                                    <td>Median Return</td>
-                                    <td>\(\tilde{X}\)</td>
-                                    <td id="tblMedian">+0.0797%</td>
-                                    <td>\(\approx \mu\)</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="analysis-card">
-                    <div class="card-title">
-                        <i class="fa-solid fa-sliders text-purple"></i> Empirical vs Normal Quantiles Breakdown
-                    </div>
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Percentile</th>
-                                    <th>Empirical Return</th>
-                                    <th>Normal Prediction</th>
-                                    <th>Deviation</th>
-                                </tr>
-                            </thead>
-                            <tbody id="quantileTableBody">
-                                <!-- Populated dynamically by JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <!-- Monte Carlo Simulator Modal -->
-        <div id="monteCarloModal" class="modal-backdrop hidden">
-            <div class="modal-card wide-modal">
-                <div class="modal-header">
-                    <h3><i class="fa-solid fa-dice text-blue"></i> Monte Carlo Stochastic Price Simulation (Geometric Brownian Motion)</h3>
-                    <button id="closeMonteCarloModal" class="close-btn">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p class="modal-desc">
-                        Simulating 10 random price trajectories 60 days into the future based on empirical continuous parameters (\(dS_t = \mu S_t dt + \sigma S_t dW_t\)).
-                    </p>
-                    <div class="chart-container-box" style="height: 340px;">
-                        <canvas id="mcChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Multi-Model Distribution Fitter Modal -->
-        <div id="modelsModal" class="modal-backdrop hidden">
-            <div class="modal-card wide-modal">
-                <div class="modal-header">
-                    <h3><i class="fa-solid fa-chart-pie text-green"></i> Multi-Model Distribution Goodness-of-Fit Ranking</h3>
-                    <button id="closeModelsModal" class="close-btn">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Probability Distribution Model</th>
-                                    <th>Log-Likelihood Score</th>
-                                    <th>Quality Rank</th>
-                                    <th>Fit Assessment</th>
-                                </tr>
-                            </thead>
-                            <tbody id="modelsTableBody">
-                                <!-- Populated dynamically by JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Multi-Asset Comparison Matrix Modal -->
-        <div id="matrixModal" class="modal-backdrop hidden">
-            <div class="modal-card wide-modal">
-                <div class="modal-header">
-                    <h3><i class="fa-solid fa-table-cells text-blue"></i> Multi-Asset Statistical Comparison Matrix</h3>
-                    <button id="closeMatrixModal" class="close-btn">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Asset Ticker</th>
-                                    <th>Mean (\(\mu\))</th>
-                                    <th>Std Dev (\(\sigma\))</th>
-                                    <th>Skewness (\(\gamma_1\))</th>
-                                    <th>Kurtosis (\(\gamma_2\))</th>
-                                    <th>Jarque-Bera Stat</th>
-                                    <th>Normality</th>
-                                </tr>
-                            </thead>
-                            <tbody id="matrixTableBody">
-                                <!-- Populated dynamically by JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Black Swan Stress Test Modal -->
-        <div id="stressModal" class="modal-backdrop hidden">
-            <div class="modal-card wide-modal">
-                <div class="modal-header">
-                    <h3><i class="fa-solid fa-skull-crossbones text-red"></i> Historical Black Swan Crises Stress Simulator</h3>
-                    <button id="closeStressModal" class="close-btn">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p class="modal-desc">
-                        Comparing real-world extreme market crash events against Gaussian Normal Distribution theoretical predictions (\(Z = \frac{X - \mu}{\sigma}\)).
-                    </p>
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Historical Crash Event</th>
-                                    <th>1-Day Drop</th>
-                                    <th>Theoretical Z-Score</th>
-                                    <th>Gaussian Predicted Odds</th>
-                                    <th>Empirical Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="stressTableBody">
-                                <!-- Populated dynamically by JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Course Formulas Reference Modal -->
-        <div id="formulaModal" class="modal-backdrop hidden">
-            <div class="modal-card wide-modal">
-                <div class="modal-header">
-                    <h3><i class="fa-solid fa-book text-blue"></i> MAT231 Course Formula Reference</h3>
-                    <button id="closeFormulaModal" class="close-btn">&times;</button>
-                </div>
-                <div class="modal-body formula-body">
-                    <div class="formula-group">
-                        <h4>1. Continuous Random Variables (PDF & CDF)</h4>
-                        <ul>
-                            <li><b>Probability Density Function (PDF):</b> \(f(x) \ge 0\), \(\int_{-\infty}^{\infty} f(x) dx = 1\)</li>
-                            <li><b>Probability Calculation:</b> \(P(a \le X \le b) = \int_{a}^{b} f(x) dx\)</li>
-                            <li><b>Cumulative Distribution Function (CDF):</b> \(F(x) = P(X \le x) = \int_{-\infty}^{x} f(t) dt\)</li>
-                            <li><b>Expected Value (Mean):</b> \(\mu = E[X] = \int_{-\infty}^{\infty} x f(x) dx\)</li>
-                            <li><b>Variance:</b> \(\sigma^2 = \text{Var}(X) = E[X^2] - \mu^2\)</li>
-                        </ul>
-                    </div>
-
-                    <div class="formula-group">
-                        <h4>2. Normal & Standard Normal Distribution</h4>
-                        <ul>
-                            <li><b>Normal PDF:</b> \(n(x; \mu, \sigma) = \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{1}{2\sigma^2}(x-\mu)^2}\)</li>
-                            <li><b>Standard Normal Transformation:</b> \(Z = \frac{X - \mu}{\sigma} \sim \mathcal{N}(0, 1)\)</li>
-                            <li><b>Standard Z Values:</b> \(P(-1.96 < Z < 1.96) = 0.95\) (95% CI)</li>
-                        </ul>
-                    </div>
-
-                    <div class="formula-group">
-                        <h4>3. Central Limit Theorem & Confidence Intervals</h4>
-                        <ul>
-                            <li><b>Sampling Distribution of \(\bar{X}\):</b> \(\mu_{\bar{X}} = \mu\), \(\sigma^2_{\bar{X}} = \frac{\sigma^2}{n}\)</li>
-                            <li><b>Standard Error:</b> \(SE = \frac{s}{\sqrt{n}}\)</li>
-                            <li><b>95% Confidence Interval for Mean \(\mu\):</b> \(\bar{x} \pm z_{\alpha/2} \frac{\sigma}{\sqrt{n}}\) (\(z_{0.025} = 1.96\))</li>
-                            <li><b>95% Chi-Square CI for Variance \(\sigma^2\):</b> \(\frac{(n-1)s^2}{\chi^2_{\alpha/2}} < \sigma^2 < \frac{(n-1)s^2}{\chi^2_{1-\alpha/2}}\)</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Probability Calculator Modal -->
-        <div id="calcModal" class="modal-backdrop hidden">
-            <div class="modal-card">
-                <div class="modal-header">
-                    <h3><i class="fa-solid fa-calculator"></i> Daily Return Probability Calculator</h3>
-                    <button id="closeModal" class="close-btn">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p class="modal-desc">
-                        Calculate the probability \(P(X \le x)\) of observing a daily market return less than or equal to a threshold \(x\%\).
-                    </p>
+                <!-- Row 2: Pro Dual Grid (Left: Chart Studio | Right: Live AI Intelligence) -->
+                <section class="pro-dual-grid">
                     
-                    <div class="form-group">
-                        <label for="returnInput">Daily Return Threshold \(x\) (%):</label>
-                        <div class="input-with-suffix">
-                            <input type="number" id="returnInput" value="-2.8" step="0.1">
-                            <span class="suffix">%</span>
+                    <!-- Left Panel: Chart Studio -->
+                    <div class="chart-studio-card">
+                        <div class="chart-studio-header">
+                            <div class="tab-buttons">
+                                <button class="tab-btn active" data-tab="histogram">
+                                    <i class="fa-solid fa-chart-column"></i> <span data-i18n="tab_hist">Histogram &amp; Fits</span>
+                                </button>
+                                <button class="tab-btn" data-tab="qqplot">
+                                    <i class="fa-solid fa-braille"></i> <span data-i18n="tab_qq">Q-Q Plot</span>
+                                </button>
+                                <button class="tab-btn" data-tab="timeseries">
+                                    <i class="fa-solid fa-chart-line"></i> <span data-i18n="tab_ts">Volatility Time Series</span>
+                                </button>
+                                <button class="tab-btn" data-tab="drawdown">
+                                    <i class="fa-solid fa-water"></i> <span data-i18n="tab_dd">Drawdown Waterfall</span>
+                                </button>
+                                <button class="tab-btn" data-tab="cdf">
+                                    <i class="fa-solid fa-bezier-curve"></i> <span data-i18n="tab_cdf">Empirical CDF</span>
+                                </button>
+                                <button class="tab-btn" data-tab="frontier">
+                                    <i class="fa-solid fa-circle-nodes"></i> <span data-i18n="tab_frontier">Markowitz Frontier</span>
+                                </button>
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+                                <span class="live-dot"></span> <span id="bannerSampleCount">1,258</span> Days
+                            </div>
+                        </div>
+
+                        <div class="chart-container-box">
+                            <canvas id="mainChart"></canvas>
                         </div>
                     </div>
 
-                    <div class="calc-results">
-                        <div class="calc-row">
-                            <span>Empirical Sample Probability \(P(X \le x)\):</span>
-                            <strong id="empProbResult" class="text-blue">1.03%</strong>
+                    <!-- Right Panel: Live AI Risk Intelligence & Copilot Feed -->
+                    <div class="ai-panel-card">
+                        <div class="ai-panel-header">
+                            <div class="ai-panel-title">
+                                <i class="fa-solid fa-brain text-blue"></i>
+                                <span>Quant AI Engine™</span>
+                                <span class="live-dot"></span>
+                            </div>
+                            <span class="ai-rating-badge" id="aiRiskGrade">GRADE A-</span>
                         </div>
-                        <div class="calc-row">
-                            <span>Theoretical Normal Probability \(P(Z \le z)\):</span>
-                            <strong id="normProbResult" class="text-red">0.02%</strong>
+
+                        <!-- Live AI Briefing -->
+                        <div class="ai-summary-box" id="aiExecutiveSummary">
+                            <!-- Dynamic briefing -->
                         </div>
-                        <div class="calc-row highlight">
-                            <span>Underestimation Ratio (Empirical / Normal):</span>
-                            <strong id="underestRatio" class="text-gold">59.2x Higher Risk</strong>
+
+                        <!-- 4 Compact AI Strategy Pillars -->
+                        <div class="ai-pillars-compact-grid">
+                            <div class="ai-compact-pillar">
+                                <span class="compact-pillar-title"><i class="fa-solid fa-triangle-exclamation"></i> Tail Shock</span>
+                                <span class="compact-pillar-desc" id="aiPillarTail">Excess Kurtosis +2.60: Crash odds ~50x Normal.</span>
+                            </div>
+                            <div class="ai-compact-pillar">
+                                <span class="compact-pillar-title"><i class="fa-solid fa-shield"></i> Hedging</span>
+                                <span class="compact-pillar-desc" id="aiPillarHedge">Allocate 15-20% defensive assets (JNJ, XOM).</span>
+                            </div>
+                            <div class="ai-compact-pillar">
+                                <span class="compact-pillar-title"><i class="fa-solid fa-scale-balanced"></i> Basel III</span>
+                                <span class="compact-pillar-desc" id="aiPillarBasel">Hold 10-day capital reserve for tail quantile.</span>
+                            </div>
+                            <div class="ai-compact-pillar">
+                                <span class="compact-pillar-title"><i class="fa-solid fa-gauge-high"></i> Resilience</span>
+                                <span class="compact-pillar-desc" id="aiPillarStress">Score: 78/100. Max Drawdown calibrated.</span>
+                            </div>
+                        </div>
+
+                        <!-- Toast / Output Box -->
+                        <div id="inlineAiAnswerBox" class="ai-answer-toast hidden">
+                            <div id="inlineAiAnswerText"></div>
+                        </div>
+
+                        <!-- Ask AI Input -->
+                        <div class="ai-chat-input-box">
+                            <input type="text" id="inlineAiInput" placeholder="Ask AI: e.g. How to hedge? Oil impact?..." class="ai-input-field">
+                            <button id="btnInlineAiAsk" class="btn btn-primary btn-sm"><i class="fa-solid fa-paper-plane"></i></button>
+                            <button id="btnOpenFullAi" class="btn btn-outline btn-sm"><i class="fa-regular fa-comment-dots"></i></button>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button id="modalCalcBtn" class="btn btn-primary">Calculate Probability</button>
-                </div>
-            </div>
+                </section>
+
+                <!-- Row 3: Basel III VaR Term Structure & Normality Audit Grid -->
+                <section class="pro-bottom-grid">
+                    
+                    <!-- Left: Multi-Horizon VaR Term Structure -->
+                    <div class="pro-section-card">
+                        <div class="card-title">
+                            <i class="fa-solid fa-shield-halved text-blue"></i>
+                            <span data-i18n="lbl_term_structure">Basel III/IV VaR Term Structure (\(\text{VaR}_T = \text{VaR}_{1\text{d}} \times \sqrt{T}\))</span>
+                        </div>
+                        <div class="term-structure-boxes">
+                            <div class="term-box">
+                                <span class="term-label">1-Day VaR (99%)</span>
+                                <span class="term-val" id="termVaR1d">-2.27%</span>
+                                <span class="term-dollar" id="termVaR1dDollar">-$22,700</span>
+                                <span class="term-sub">Intraday</span>
+                            </div>
+                            <div class="term-box">
+                                <span class="term-label">5-Day (1 Week)</span>
+                                <span class="term-val" id="termVaR5d">-5.08%</span>
+                                <span class="term-dollar" id="termVaR5dDollar">-$50,800</span>
+                                <span class="term-sub">Weekly</span>
+                            </div>
+                            <div class="term-box highlight">
+                                <span class="term-label">10-Day Basel VaR</span>
+                                <span class="term-val" id="termVaR10d">-7.18%</span>
+                                <span class="term-dollar" id="termVaR10dDollar">-$71,800</span>
+                                <span class="term-sub">Regulatory</span>
+                            </div>
+                            <div class="term-box">
+                                <span class="term-label">21-Day (1 Month)</span>
+                                <span class="term-val" id="termVaR21d">-10.40%</span>
+                                <span class="term-dollar" id="termVaR21dDollar">-$104,000</span>
+                                <span class="term-sub">Monthly</span>
+                            </div>
+                            <div class="term-box">
+                                <span class="term-label">252-Day (1 Year)</span>
+                                <span class="term-val" id="termVaR252d">-36.03%</span>
+                                <span class="term-dollar" id="termVaR252dDollar">-$360,300</span>
+                                <span class="term-sub">Annual</span>
+                            </div>
+                        </div>
+
+                        <!-- 4 Basel Moments -->
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);">
+                            <div>
+                                <span style="font-size: 10.5px; color: var(--text-muted);">95% Hist. VaR:</span>
+                                <strong style="display: block; font-family: 'Fira Code', monospace; color: var(--accent-rose); font-size: 13px;" id="valVaR95Hist">-1.28%</strong>
+                            </div>
+                            <div>
+                                <span style="font-size: 10.5px; color: var(--text-muted);">99% Hist. VaR:</span>
+                                <strong style="display: block; font-family: 'Fira Code', monospace; color: var(--accent-rose); font-size: 13px;" id="valVaR99Hist">-2.21%</strong>
+                            </div>
+                            <div>
+                                <span style="font-size: 10.5px; color: var(--text-muted);">99% Cornish-Fisher:</span>
+                                <strong style="display: block; font-family: 'Fira Code', monospace; color: var(--accent-rose); font-size: 13px;" id="valVaR99CF">-2.44%</strong>
+                            </div>
+                            <div>
+                                <span style="font-size: 10.5px; color: var(--text-muted);">99% Expected Shortfall:</span>
+                                <strong style="display: block; font-family: 'Fira Code', monospace; color: var(--accent-rose); font-size: 13px;" id="valCVaR99">-3.15%</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Regulatory Normality Audit & Statistical Summary -->
+                    <div class="pro-section-card">
+                        <div class="card-title">
+                            <i class="fa-solid fa-scale-balanced text-blue"></i>
+                            <span data-i18n="lbl_normality_header">Regulatory Normality Audit &amp; Hypothesis Testing</span>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; background: rgba(244, 63, 94, 0.12); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.3);" id="normalityBadge">
+                                    <i class="fa-solid fa-circle-xmark"></i> \(H_0\) REJECTED
+                                </span>
+                                <span style="font-size: 11.5px; color: var(--text-secondary);">Jarque-Bera Stat: <strong id="valJB" style="color: var(--text-pure);">411.44</strong> (\(p < 0.0001\))</span>
+                            </div>
+                            <span style="font-size: 11px; color: var(--accent-emerald);">Student's \(t\) #1 Fit</span>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Metric</th>
+                                        <th>Empirical</th>
+                                        <th>Normal Benchmark</th>
+                                        <th>Sharpe / MDD</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Annualized Return</td>
+                                        <td id="tblAnnualMean" style="color: var(--accent-emerald);">+14.62% / yr</td>
+                                        <td>—</td>
+                                        <td>Sharpe: <strong id="valSharpe">+0.798</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Annualized Volatility</td>
+                                        <td id="tblAnnualStd">12.67% / yr</td>
+                                        <td>—</td>
+                                        <td>Sortino: <strong id="valSortino">+1.124</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Min / Max Return</td>
+                                        <td id="tblMinMax">-4.13% / +3.24%</td>
+                                        <td>Symmetric</td>
+                                        <td>Max DD: <strong id="valMDD" style="color: var(--accent-rose);">-19.78%</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>95% CI for Mean \(\mu\)</td>
+                                        <td id="valCIMean">[+0.010%, +0.098%]</td>
+                                        <td>CLT \(SE = 0.022\%\)</td>
+                                        <td>Beta: <strong id="valBeta">1.000</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </main>
         </div>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <p>MAT231 Probability & Statistics • S&P 500 Daily Returns Continuous Random Variables Project</p>
-            <p class="sub-footer">Built with Vanilla HTML5, CSS3, JavaScript & Chart.js</p>
-        </footer>
     </div>
 
-    <!-- Application Scripts -->
+    <!-- ================================================================= -->
+    <!-- ENTERPRISE MODALS                                                 -->
+    <!-- ================================================================= -->
+
+    <!-- Modal 0: Quant AI Copilot Drawer -->
+    <div id="aiCopilotModal" class="modal-backdrop hidden">
+        <div class="modal-card wide-modal">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-brain text-blue"></i> <span data-i18n="m_ai_title">Quant AI Risk Intelligence Copilot</span></h3>
+                <button id="closeAiCopilotModal" class="close-btn" onclick="this.closest('.modal-backdrop').classList.add('hidden');" title="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="ai-chat-container">
+                    <div class="ai-messages-box" id="aiChatMessages">
+                        <div class="ai-msg bot">
+                            <div class="ai-avatar"><i class="fa-solid fa-brain"></i></div>
+                            <div class="ai-bubble">
+                                <strong id="aiGreetingTitle">Quant AI Risk Copilot Online</strong>
+                                <p id="aiGreetingBody">I am your quantitative risk intelligence advisor powered by Groq Cloud. I have loaded live statistical moments, Basel III VaR/CVaR metrics, and tail diagnostics for your active portfolio. Ask me anything or select a prompt below:</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prompt Pills -->
+                    <div class="ai-prompt-pills">
+                        <button type="button" class="ai-pill" data-prompt="executive_audit" onclick="runAiPrompt('executive_audit')">Executive Risk Audit</button>
+                        <button type="button" class="ai-pill" data-prompt="tail_risk" onclick="runAiPrompt('tail_risk')">Analyze Tail Fatness</button>
+                        <button type="button" class="ai-pill" data-prompt="var_explain" onclick="runAiPrompt('var_explain')">Explain Cornish-Fisher VaR</button>
+                        <button type="button" class="ai-pill" data-prompt="crash_scenario" onclick="runAiPrompt('crash_scenario')">2008 Crash Stress Test</button>
+                        <button type="button" class="ai-pill" data-prompt="optimize_tips" onclick="runAiPrompt('optimize_tips')">Portfolio Optimization Tips</button>
+                    </div>
+
+                    <!-- Chat Input Box -->
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <input type="text" id="aiUserInput" placeholder="Ask Quant AI about risk, VaR, moments, or portfolio allocation..." class="ai-chat-input" onkeydown="if(event.key==='Enter') handleSendAiMessage();">
+                        <button type="button" id="btnSendAiMessage" class="btn btn-primary" onclick="handleSendAiMessage();"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 1: Markowitz Portfolio Optimizer & MCR -->
+    <div id="portfolioOptimizerModal" class="modal-backdrop hidden">
+        <div class="modal-card wide-modal">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-briefcase text-blue"></i> <span data-i18n="m_opt_title">Institutional Markowitz Portfolio Constructor &amp; Risk Budgeting</span></h3>
+                <button class="close-btn" onclick="this.closest('.modal-backdrop').classList.add('hidden');" title="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-desc" data-i18n="m_opt_desc">
+                    Construct a custom multi-asset portfolio, adjust asset weights dynamically, and calculate Portfolio Expected Return \(E[R_p]\), Portfolio Volatility \(\sigma_p = \sqrt{w^T \Sigma w}\), Sharpe Ratio, and Marginal Contribution to Risk (MCR).
+                </p>
+
+                <!-- AI Preset Allocators -->
+                <div class="ai-preset-row" style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <span style="font-size: 11px; font-weight: 700; color: var(--brand-light);">AI Allocation Presets:</span>
+                    <button id="btnAiConservative" class="btn btn-outline btn-sm">Conservative (Min Drawdown)</button>
+                    <button id="btnAiBalanced" class="btn btn-outline btn-sm">Endowment (Max Sharpe)</button>
+                    <button id="btnAiAggressive" class="btn btn-outline btn-sm">Growth (Tech Alpha)</button>
+                </div>
+
+                <div class="optimizer-layout">
+                    <div class="optimizer-sliders" id="optimizerSlidersContainer">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+
+                    <div class="optimizer-summary-card">
+                        <h4>Custom Portfolio Live Metrics</h4>
+                        <div class="opt-kpi-row">
+                            <span>Expected Annual Return:</span>
+                            <strong id="optPortReturn" class="text-green">+18.42% / yr</strong>
+                        </div>
+                        <div class="opt-kpi-row">
+                            <span>Expected Annual Volatility:</span>
+                            <strong id="optPortVol">14.12% / yr</strong>
+                        </div>
+                        <div class="opt-kpi-row">
+                            <span>Portfolio Sharpe Ratio (\(R_f=4.5\%\)):</span>
+                            <strong id="optPortSharpe">0.986</strong>
+                        </div>
+                        <div class="opt-kpi-row">
+                            <span>99% 1-Day Basel VaR:</span>
+                            <strong id="optPortVaR99" class="text-red">-2.18%</strong>
+                        </div>
+                        <div class="opt-kpi-row">
+                            <span>99% Dollar Loss at Risk ($1M):</span>
+                            <strong id="optPortVaRDollar" class="text-red">-$21,800 USD</strong>
+                        </div>
+                        <div class="weight-check-box" id="optTotalWeightCheck">
+                            Total Allocated Weight: <strong id="optTotalWeight">100.0%</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 1.5: Correlation Matrix Heatmap -->
+    <div id="heatmapModal" class="modal-backdrop hidden">
+        <div class="modal-card wide-modal">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-table-cells text-blue"></i> <span data-i18n="m_heatmap_title">Cross-Asset Correlation Heatmap &amp; Diversification Matrix</span></h3>
+                <button id="closeHeatmapModal" class="close-btn" onclick="this.closest('.modal-backdrop').classList.add('hidden');" title="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-desc">
+                    Visualizing pairwise Pearson correlation coefficients (\(\rho_{ij}\)) between institutional assets.
+                </p>
+                <div class="table-responsive" id="heatmapContainer">
+                    <!-- Populated dynamically by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Black Swan & Macro Stress Testing Simulator -->
+    <div id="stressModal" class="modal-backdrop hidden">
+        <div class="modal-card wide-modal">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-triangle-exclamation text-red"></i> <span data-i18n="m_stress_title">Historical Black Swan &amp; Macroeconomic Stress Testing Lab</span></h3>
+                <button id="closeStressModal" class="close-btn" onclick="this.closest('.modal-backdrop').classList.add('hidden');" title="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Reverse Stress Testing -->
+                <div class="reverse-stress-box">
+                    <div class="reverse-header">
+                        <i class="fa-solid fa-calculator text-blue"></i> <strong>Reverse Stress Testing Calculator</strong>
+                    </div>
+                    <div class="reverse-inputs">
+                        <label for="reverseLossInput">Specify Tolerable 1-Day Loss (%):</label>
+                        <div style="display: flex; align-items: center; background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px;">
+                            <input type="number" id="reverseLossInput" value="-8.0" step="0.5" style="background: transparent; border: none; color: var(--text-pure); font-family: 'Fira Code', monospace; font-size: 12px; outline: none; width: 60px;">
+                            <span style="color: var(--text-muted); font-size: 11px;">%</span>
+                        </div>
+                        <button id="btnRunReverseStress" class="btn btn-primary btn-sm">Calculate Shock Severity</button>
+                    </div>
+                    <div class="reverse-results" id="reverseStressResults">
+                        <span>Severity: <strong id="revZScore">Z = -10.09σ</strong></span>
+                        <span>Normal Odds: <strong class="text-red" id="revNormOdds">1 in 320 Million Years</strong></span>
+                        <span>Reality: <strong class="text-green" id="revRealOdds">Realized Multiple Times</strong></span>
+                    </div>
+                </div>
+
+                <!-- AI Custom Macro Scenario Predictor -->
+                <div style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-top: 12px;">
+                    <div style="font-size: 12px; font-weight: 700; color: var(--text-pure); margin-bottom: 6px;">
+                        <i class="fa-solid fa-brain text-blue"></i> <strong>AI Custom Macro Scenario Predictor</strong>
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                        <input type="text" id="customScenarioInput" placeholder="Enter custom shock: e.g. Oil spikes +40%, Fed cuts 100bps..." class="ai-input-field">
+                        <button id="btnPredictAiScenario" class="btn btn-primary btn-sm"><i class="fa-solid fa-bolt"></i> Simulate Shock</button>
+                    </div>
+                    <div id="aiScenarioResult" class="ai-answer-toast hidden" style="margin-top: 8px;"></div>
+                </div>
+
+                <div class="table-responsive" style="margin-top: 14px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Stress Scenario Event</th>
+                                <th>1-Day Drop</th>
+                                <th>Z-Score</th>
+                                <th>Normal Odds</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stressTableBody">
+                            <!-- Populated dynamically by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Monte Carlo Stochastic GBM Simulator -->
+    <div id="monteCarloModal" class="modal-backdrop hidden">
+        <div class="modal-card wide-modal">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-dice text-blue"></i> <span data-i18n="m_mc_title">Monte Carlo Stochastic Price Simulation (Geometric Brownian Motion)</span></h3>
+                <button id="closeMonteCarloModal" class="close-btn" onclick="this.closest('.modal-backdrop').classList.add('hidden');" title="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 10px;">
+                    <div>
+                        <label style="display: block; font-size: 11px; color: var(--text-secondary); margin-bottom: 3px;">Horizon:</label>
+                        <select id="mcHorizonSelect" class="custom-select">
+                            <option value="30">30 Days (1 Month)</option>
+                            <option value="60" selected>60 Days (Quarter)</option>
+                            <option value="180">180 Days (Half Year)</option>
+                            <option value="252">252 Days (1 Year)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 11px; color: var(--text-secondary); margin-bottom: 3px;">Paths:</label>
+                        <select id="mcPathsSelect" class="custom-select">
+                            <option value="10">10 Paths</option>
+                            <option value="20" selected>20 Paths</option>
+                            <option value="40">40 Paths</option>
+                        </select>
+                    </div>
+                    <button id="btnReRunMC" class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-rotate"></i> Re-Simulate
+                    </button>
+                </div>
+
+                <div class="chart-container-box" style="height: 300px;">
+                    <canvas id="mcChart"></canvas>
+                </div>
+
+                <div style="display: flex; justify-content: space-around; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 8px; padding: 8px; margin-top: 10px; font-size: 11.5px;">
+                    <div>5th Percentile (Tail Risk): <strong class="text-red" id="mcP05">$94.20</strong></div>
+                    <div>Median Expected: <strong class="text-blue" id="mcMedian">$103.45</strong></div>
+                    <div>95th Percentile (Bull): <strong class="text-green" id="mcP95">$114.80</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Distribution Fitter -->
+    <div id="modelsModal" class="modal-backdrop hidden">
+        <div class="modal-card wide-modal">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-chart-pie text-blue"></i> <span data-i18n="m_models_title">Probability Distribution Goodness-of-Fit Ranking</span></h3>
+                <button id="closeModelsModal" class="close-btn" onclick="this.closest('.modal-backdrop').classList.add('hidden');" title="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Parameters</th>
+                                <th>Log-Likelihood</th>
+                                <th>AIC Score</th>
+                                <th>BIC Score</th>
+                                <th>Rank</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modelsTableBody">
+                            <!-- Populated dynamically by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 5: Risk Matrix -->
+    <div id="matrixModal" class="modal-backdrop hidden">
+        <div class="modal-card wide-modal">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-layer-group text-blue"></i> <span data-i18n="m_matrix_title">Multi-Asset &amp; Portfolio Statistical Risk Matrix (41 Assets)</span></h3>
+                <button id="closeMatrixModal" class="close-btn" onclick="this.closest('.modal-backdrop').classList.add('hidden');" title="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 8px;">
+                    <input type="text" id="matrixSearchInput" placeholder="Filter ticker or sector..." class="universal-search-input" style="width: 100%;">
+                </div>
+                <div class="table-responsive" style="max-height: 420px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Ticker</th>
+                                <th>Name</th>
+                                <th>Sector</th>
+                                <th>Daily Mean</th>
+                                <th>Ann. Vol</th>
+                                <th>Skew</th>
+                                <th>Kurtosis</th>
+                                <th>99% VaR</th>
+                                <th>99% CVaR</th>
+                                <th>Sharpe</th>
+                                <th>Normality</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrixTableBody">
+                            <!-- Populated dynamically by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 5.5: Risk Certificate -->
+    <div id="certificateModal" class="modal-backdrop hidden">
+        <div class="modal-card wide-modal">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-certificate text-gold"></i> <span>Institutional Risk Audit Compliance Certificate</span></h3>
+                <button id="closeCertificateModal" class="close-btn" onclick="this.closest('.modal-backdrop').classList.add('hidden');" title="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="border: 1px solid var(--border); padding: 20px; background: var(--bg-subtle); border-radius: 8px;">
+                    <div style="text-align: center; margin-bottom: 14px;">
+                        <span class="badge-subtle">BASEL III / IV CERTIFIED</span>
+                        <h2 style="font-size: 17px; color: var(--text-pure); margin-top: 4px;">CERTIFICATE OF QUANTITATIVE RISK COMPLIANCE</h2>
+                        <p style="font-size: 11px; color: var(--text-muted);">Issued by QuantRisk Pro™ Quantitative Risk Desk</p>
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-secondary); text-align: center; margin-bottom: 14px;">
+                        <p>This certifies that the investment asset / portfolio identified as:</p>
+                        <h3 style="font-size: 15px; color: var(--brand-light); margin: 4px 0;" id="certAssetName">S&amp;P 500 Benchmark (MARKET_AVG)</h3>
+                        <p>has undergone rigorous Continuous Random Variable statistical modeling, fat-tail risk calibration, and Basel III Capital Adequacy audits.</p>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 12px 0; text-align: left;">
+                            <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 6px 8px; border-radius: 4px; font-size: 10px;"><span>Observations:</span><strong style="display: block; color: var(--text-pure); font-family: 'Fira Code', monospace; margin-top: 2px;" id="certN">1,258 Days</strong></div>
+                            <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 6px 8px; border-radius: 4px; font-size: 10px;"><span>Daily Drift (\(\mu\)):</span><strong style="display: block; color: var(--text-pure); font-family: 'Fira Code', monospace; margin-top: 2px;" id="certMean">+0.0543%</strong></div>
+                            <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 6px 8px; border-radius: 4px; font-size: 10px;"><span>Annual Volatility:</span><strong style="display: block; color: var(--text-pure); font-family: 'Fira Code', monospace; margin-top: 2px;" id="certVol">12.67%</strong></div>
+                            <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 6px 8px; border-radius: 4px; font-size: 10px;"><span>Excess Kurtosis:</span><strong style="display: block; color: var(--text-pure); font-family: 'Fira Code', monospace; margin-top: 2px;" id="certKurt">+2.5985</strong></div>
+                            <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 6px 8px; border-radius: 4px; font-size: 10px;"><span>10-Day Basel VaR:</span><strong style="display: block; color: var(--accent-rose); font-family: 'Fira Code', monospace; margin-top: 2px;" id="certBaselVaR">-7.18%</strong></div>
+                            <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 6px 8px; border-radius: 4px; font-size: 10px;"><span>99% Expected Shortfall:</span><strong style="display: block; color: var(--accent-rose); font-family: 'Fira Code', monospace; margin-top: 2px;" id="certCVaR">-3.15%</strong></div>
+                            <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 6px 8px; border-radius: 4px; font-size: 10px;"><span>Sharpe Ratio:</span><strong style="display: block; color: var(--accent-emerald); font-family: 'Fira Code', monospace; margin-top: 2px;">+0.798</strong></div>
+                            <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 6px 8px; border-radius: 4px; font-size: 10px;"><span>Normality (\(H_0\)):</span><strong style="display: block; color: var(--accent-rose); font-family: 'Fira Code', monospace; margin-top: 2px;" id="certNormVerdict">REJECTED</strong></div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border);">
+                        <div style="text-align: left; font-size: 11px; color: var(--text-secondary);">
+                            <div style="width: 140px; height: 1px; background: var(--border-hover); margin-bottom: 4px;"></div>
+                            <strong style="color: var(--text-pure);">Omar Saeed</strong><br>
+                            <span>Chief Risk Officer &amp; Quantitative Architect</span>
+                        </div>
+                        <div style="font-size: 10px; color: var(--text-muted); font-family: 'Fira Code', monospace;">
+                            Verification Checksum: <span id="certChecksum">QR-PRO-2026-AUDIT</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 12px;">
+                    <button onclick="window.print()" class="btn btn-primary"><i class="fa-solid fa-print"></i> Print Official Certificate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 6: Calculator -->
+    <div id="calcModal" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-calculator text-blue"></i> <span data-i18n="m_calc_title">Value at Risk &amp; Loss Calculator</span></h3>
+                <button id="closeModal" class="close-btn" onclick="this.closest('.modal-backdrop').classList.add('hidden');" title="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 10px;">
+                    <label for="returnInput" style="display: block; font-size: 11px; color: var(--text-secondary); margin-bottom: 3px;">Loss Threshold \(x\) (%):</label>
+                    <input type="number" id="returnInput" value="-2.5" step="0.1" class="universal-search-input" style="width: 100%;">
+                </div>
+
+                <div style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 11.5px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Empirical Probability \(P(X \le x)\):</span>
+                        <strong id="empProbResult" class="text-blue">1.03%</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Gaussian Normal Probability:</span>
+                        <strong id="normProbResult" class="text-red">0.02%</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Capital Loss at Risk:</span>
+                        <strong id="calcLossDollar" class="text-red">-$25,000 USD</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 4px;">
+                        <span>Underestimation Ratio:</span>
+                        <strong id="underestRatio" class="text-green">51.5x Higher Risk</strong>
+                    </div>
+                </div>
+            </div>
+            <div style="padding: 10px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end;">
+                <button id="modalCalcBtn" class="btn btn-primary btn-sm">Calculate Risk</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 7: Formulas -->
+    <div id="formulaModal" class="modal-backdrop hidden">
+        <div class="modal-card wide-modal">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-book text-blue"></i> <span data-i18n="m_formula_title">Quantitative Financial Risk Mathematical Foundations</span></h3>
+                <button id="closeFormulaModal" class="close-btn" onclick="this.closest('.modal-backdrop').classList.add('hidden');" title="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 8px; padding: 12px;">
+                        <h4 style="color: var(--text-pure); font-size: 12.5px; margin-bottom: 4px;">1. Continuous Random Variables &amp; Moments</h4>
+                        <p style="font-size: 11.5px; color: var(--text-secondary);">
+                            \(f(x) \ge 0, \quad \int_{-\infty}^{\infty} f(x) dx = 1, \quad \mu = E[X] = \int_{-\infty}^{\infty} x f(x) dx, \quad \sigma^2 = E[(X-\mu)^2]\)
+                        </p>
+                    </div>
+                    <div style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 8px; padding: 12px;">
+                        <h4 style="color: var(--text-pure); font-size: 12.5px; margin-bottom: 4px;">2. Basel III / IV Value at Risk &amp; Cornish-Fisher</h4>
+                        <p style="font-size: 11.5px; color: var(--text-secondary);">
+                            \(z_{CF} = z_\alpha + \frac{1}{6}(z_\alpha^2 - 1)\gamma_1 + \frac{1}{24}(z_\alpha^3 - 3z_\alpha)\gamma_2 - \frac{1}{36}(2z_\alpha^3 - 5z_\alpha)\gamma_1^2\)
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 8: Pricing -->
+    <div id="pricingApiModal" class="modal-backdrop hidden">
+        <div class="modal-card wide-modal">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-cube text-blue"></i> <span data-i18n="m_pricing_title">QuantRisk Pro™ Commercial Tiers &amp; REST API</span></h3>
+                <button id="closePricingApiModal" class="close-btn" onclick="this.closest('.modal-backdrop').classList.add('hidden');" title="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <div class="plan-tier">QUANT HEDGE FUND</div>
+                        <div class="plan-price">$4,999<span>/mo</span></div>
+                        <div class="plan-desc">For quantitative trading desks</div>
+                        <ul class="plan-features">
+                            <li><i class="fa-solid fa-check text-green"></i> 500+ Assets &amp; Custom CSVs</li>
+                            <li><i class="fa-solid fa-check text-green"></i> Basel III VaR &amp; CVaR (99.9%)</li>
+                            <li><i class="fa-solid fa-check text-green"></i> REST API (100k calls/day)</li>
+                        </ul>
+                    </div>
+                    <div class="pricing-card featured">
+                        <div class="plan-tier">ENTERPRISE ASSET MANAGEMENT</div>
+                        <div class="plan-price">$12,500<span>/mo</span></div>
+                        <div class="plan-desc">For institutional investment firms</div>
+                        <ul class="plan-features">
+                            <li><i class="fa-solid fa-check text-green"></i> Markowitz Optimization Suite</li>
+                            <li><i class="fa-solid fa-check text-green"></i> Black Swan Stress Lab</li>
+                            <li><i class="fa-solid fa-check text-green"></i> Monte Carlo Projections</li>
+                            <li><i class="fa-solid fa-check text-green"></i> Board-Ready PDF Audits</li>
+                        </ul>
+                    </div>
+                    <div class="pricing-card">
+                        <div class="plan-tier">GLOBAL INSTITUTIONAL BANK</div>
+                        <div class="plan-price">$25,000<span>/mo</span></div>
+                        <div class="plan-desc">Private cloud &amp; on-premise</div>
+                        <ul class="plan-features">
+                            <li><i class="fa-solid fa-check text-green"></i> Unlimited Portfolios</li>
+                            <li><i class="fa-solid fa-check text-green"></i> Real-time Market Feeds</li>
+                            <li><i class="fa-solid fa-check text-green"></i> Basel IV Reporting Suite</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="app_data.js"></script>
     <script src="app.js"></script>
 </body>

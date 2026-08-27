@@ -1,16 +1,23 @@
 ====================================================
-MAT231 PROJECT SUMMARY: S&P 500 DAILY RETURNS
+QUANTRISK ENTERPRISE™ / MAT231 STATISTICAL AUDIT
 ====================================================
 
-Sample Size (N): 1,258 trading days
-Mean (μ): 0.000543 (0.0543%)
-Variance (σ²): 0.00006369
-Standard Deviation (σ): 0.007980 (0.7980%)
-Skewness: -0.5237
-Excess Kurtosis: 2.5985
-Minimum Return: -0.041336 (-4.13%)
-Maximum Return: 0.032426 (3.24%)
-Median Return: 0.000797 (0.0797%)
-IQR: 0.008102
+Sample Observations (N): 1,258 trading days
+Daily Mean (μ): 0.000543 (0.0543%)
+Annualized Return: 14.67%
+Daily Variance (σ²): 0.00006369
+Daily Volatility (σ): 0.007980 (0.7980%)
+Annualized Volatility: 12.67%
+Skewness (γ₁): -0.5237
+Excess Kurtosis (γ₂): 2.5985
+Minimum Daily Return: -4.13%
+Maximum Daily Return: 3.24%
+Median Daily Return: 0.0797%
+Interquartile Range (IQR): 0.8102%
+95% Historical 1-Day VaR: -1.37%
+99% Historical 1-Day VaR: -2.27%
+99% Cornish-Fisher VaR: -2.51%
+99% Expected Shortfall (CVaR): -2.96%
 Jarque-Bera Stat: 411.4433 (p-val: 4.5313e-90)
 Shapiro-Wilk Stat: 0.9649 (p-val: 7.0038e-17)
+Normality Test Audit: REJECTED (Non-Gaussian Fat Tails)

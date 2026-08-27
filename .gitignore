@@ -15,7 +15,9 @@ venv/
 ENV/
 .vscode/
 .idea/
+.netlify/
 
 # OS generated files
 .DS_Store
 Thumbs.db
+*.tmp
