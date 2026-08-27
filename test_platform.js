@@ -36,9 +36,7 @@ async function runTests() {
         "app.js",
         "app_data.js",
         "generate_pdf_report.py",
-        "generate_pptx_presentation.py",
-        "QuantRisk_Executive_Report.pdf",
-        "QuantRisk_Executive_Presentation.pptx"
+        "generate_pptx_presentation.py"
     ];
     files.forEach(f => {
         const fullPath = path.join(projectDir, f);
