@@ -55,7 +55,6 @@ Rooted in the rigorous mathematical foundations of **Continuous Random Variables
 ├── app_data.js                  # Pre-computed JSON Database (41 Assets & Portfolios)
 ├── app_data.json                # Raw Institutional JSON Data Store
 ├── analysis.py                  # Python Quantitative Data & Diagnostic Plots Pipeline
-├── Run_App.bat                  # 1-Click Desktop Launcher
 ├── report.md                    # Comprehensive Academic Research Paper & Technical Spec
 ├── summary_metrics.txt          # Exported Text Summary of Empirical Metrics
 ├── requirements.txt             # Python Package Dependencies
